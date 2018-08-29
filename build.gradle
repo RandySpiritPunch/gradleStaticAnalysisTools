@@ -1,0 +1,82 @@
+allprojects {
+    repositories {
+        mavenLocal()
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'pmd'
+apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
+apply plugin: 'findbugs'
+apply plugin: 'build-dashboard'
+
+ext {
+    pmdVersion = '5.4.+'
+    checkStyleVersion = '7.6.1'
+    jacocoVersion = '0.8.1'
+}
+
+group 'edu.self.learn'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile "org.mockito:mockito-core:2.+"
+}
+
+pmd {
+    ruleSetFiles = files("ruleset.xml")
+    toolVersion pmdVersion
+}
+
+checkstyle {
+    toolVersion checkStyleVersion
+    config = rootProject.resources.text.fromFile("rules.xml")
+}
+
+jacoco {
+    toolVersion jacocoVersion
+}
+
+jacocoTestCoverageVerification {
+    mustRunAfter(pmdMain, pmdTest, checkstyleMain, checkstyleTest, findbugsMain, findbugsTest)
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.9
+            }
+        }
+    }
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+        html.stylesheet rootProject.resources.text.fromFile("Findbugs_style.xsl")
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.enabled true
+    }
+}
+
+test {
+    reports.junitXml.enabled = false
+}
+
+test.finalizedBy 'jacocoTestReport'
+check.dependsOn jacocoTestCoverageVerification
