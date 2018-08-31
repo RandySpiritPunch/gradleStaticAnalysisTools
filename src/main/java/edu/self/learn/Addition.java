@@ -9,7 +9,4 @@ public final class Addition {
         return numOne + numTwo;
     }
 
-    //    public static int minus(final int numOne, final int numTwo) {
-    //        return numOne - numTwo;
-    //    }
 }
